@@ -8,7 +8,7 @@ datasource db {
 }
 
 model dados {
-  id               Int     @id
+  id               Int     @id @default(autoincrement())
   User             String? @db.VarChar(45)
   password         String? @db.VarChar(45)
   cashback         String? @db.VarChar(45)
