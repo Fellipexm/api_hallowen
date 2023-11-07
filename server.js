@@ -4,17 +4,16 @@ const cors = require('cors');
 const mysql = require('mysql');
 const app = express();
 const PORT = 3000;
-const hoek = require('hoek');
 
 app.use(bodyParser.json());
 app.use(cors());
 
 const pool = mysql.createPool({
   connectionLimit: 10,
-  host: 'hallowen.cluster-ceycyd1m7eei.us-east-1.rds.amazonaws.com',
-  user: 'admin', 
+  host: 'hallowen.ceycyd1m7eei.us-east-1.rds.amazonaws.com',
+  user: 'Fellipe', 
   password: 'senacminas', 
-  database: 'hallowen' 
+  database: 'Dados'  
 });
 
 app.post('/users', (req, res) => {
