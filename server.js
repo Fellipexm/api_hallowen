@@ -1,61 +1,61 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const mysql = require('mysql');
+const { PrismaClient } = require('@prisma/client');
+
 const app = express();
 const PORT = 3000;
-const hoek = require('hoek');
 
 app.use(bodyParser.json());
 app.use(cors());
 
-const pool = mysql.createPool({
-  connectionLimit: 10,
-  host: 'hallowen.cluster-ceycyd1m7eei.us-east-1.rds.amazonaws.com',
-  user: 'admin', 
-  password: 'senacminas', 
-  database: 'hallowen' 
-});
+const prisma = new PrismaClient();
 
-app.post('/users', (req, res) => {
+app.post('/users', async (req, res) => {
   const { username, password, cashback, availableBalance } = req.body;
-  pool.query(
-    'INSERT INTO users (username, password, cashback, available_balance) VALUES (?, ?, ?, ?)',
-    [username, password, cashback, availableBalance],
-    (error, results) => {
-      if (error) {
-        console.error('Erro ao inserir usuário no banco de dados:', error);
-        res.status(500).json({ message: 'Erro interno do servidor' });
-      } else {
-        res.status(201).json(results);
-      }
-    }
-  );
+  try {
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        password,
+        cashback,
+        availableBalance,
+      },
+    });
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error('Erro ao inserir usuário no banco de dados:', error);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }
 });
 
-app.get('/users', (req, res) => {
-  pool.query('SELECT * FROM users', (error, results) => {
-    if (error) {
-      console.error('Erro ao recuperar usuários do banco de dados:', error);
-      res.status(500).json({ message: 'Erro interno do servidor' });
-    } else {
-      res.json(results);
-    }
-  });
+app.get('/users', async (req, res) => {
+  try {
+    const users = await prisma.user.findMany();
+    res.json(users);
+  } catch (error) {
+    console.error('Erro ao recuperar usuários do banco de dados:', error);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }
 });
 
-app.get('/users/:username', (req, res) => {
+app.get('/users/:username', async (req, res) => {
   const { username } = req.params;
-  pool.query('SELECT * FROM users WHERE username = ?', [username], (error, results) => {
-    if (error) {
-      console.error('Erro ao recuperar usuário do banco de dados:', error);
-      res.status(500).json({ message: 'Erro interno do servidor' });
-    } else if (results.length > 0) {
-      res.json(results[0]);
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        username,
+      },
+    });
+    if (user) {
+      res.json(user);
     } else {
       res.status(404).json({ message: 'Usuário não encontrado' });
     }
-  });
+  } catch (error) {
+    console.error('Erro ao recuperar usuário do banco de dados:', error);
+    res.status(500).json({ message: 'Erro interno do servidor' });
+  }
 });
 
 app.listen(PORT, () => {

@@ -18,5 +18,9 @@
     "mysql": "^2.18.1",
     "pg": "^8.11.3",
     "psql": "^0.0.1"
+  },
+  "devDependencies": {
+    "@prisma/client": "^5.5.2",
+    "prisma": "^5.5.2"
   }
 }
