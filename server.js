@@ -3,13 +3,12 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-const PORT = 3000;
-const IP = '172.16.31.43';
+const PORT = process.env.PORT || 80; // Altera a porta para usar a variável de ambiente do Render
 
 app.use(bodyParser.json());
 app.use(cors());
 
-// Placeholder for in-memory "database"
+// Placeholder para in-memory "database"
 const users = [];
 
 // Rota para obter todos os usuários
@@ -77,6 +76,28 @@ app.post('/login', (req, res) => {
   }
 });
 
-app.listen(PORT, IP, () => {
-  console.log(`Servidor está rodando em http://${IP}:${PORT}`);
+// Rota para atualizar informações de um usuário usando PUT
+app.put('/users/:name', (req, res) => {
+  const userName = req.params.name;
+  const userIndex = users.findIndex((u) => u.nome === userName);
+
+  if (userIndex !== -1) {
+    const { pontos, dinheiro } = req.body;
+
+    if (pontos !== undefined) {
+      users[userIndex].pontos = pontos;
+    }
+
+    if (dinheiro !== undefined) {
+      users[userIndex].dinheiro = dinheiro;
+    }
+
+    res.json(users[userIndex]);
+  } else {
+    res.status(404).json({ message: 'Usuário não encontrado' });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor está rodando na porta ${PORT}`);
 });
