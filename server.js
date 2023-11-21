@@ -3,20 +3,17 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 80; // Altera a porta para usar a variável de ambiente do Render
+const PORT = process.env.PORT || 80;
 
 app.use(bodyParser.json());
 app.use(cors());
 
-// Placeholder para in-memory "database"
 const users = [];
 
-// Rota para obter todos os usuários
 app.get('/users', (req, res) => {
   res.json(users);
 });
 
-// Rota para obter informações de um usuário específico
 app.get('/users/:name', (req, res) => {
   const userName = req.params.name;
   const user = users.find((u) => u.nome === userName);
@@ -33,7 +30,6 @@ app.get('/users/:name', (req, res) => {
   }
 });
 
-// Rota para criar um novo usuário
 app.post('/users', (req, res) => {
   const { nome, email, senha } = req.body;
 
@@ -46,7 +42,7 @@ app.post('/users', (req, res) => {
     email,
     senha,
     pontos: 0,
-    dinheiro: 0, // Adiciona o campo dinheiro com valor inicial 0
+    dinheiro: 0,
   };
 
   users.push(newUser);
@@ -54,7 +50,6 @@ app.post('/users', (req, res) => {
   res.status(201).json(newUser);
 });
 
-// Rota para fazer login
 app.post('/login', (req, res) => {
   const { nome, senha } = req.body;
 
@@ -65,7 +60,6 @@ app.post('/login', (req, res) => {
   const userIndex = users.findIndex((u) => u.nome === nome);
 
   if (userIndex !== -1 && users[userIndex].senha === senha) {
-    // Se o usuário existe e a senha está correta, atualizar pontos e dinheiro, e retornar informações de usuário
     users[userIndex].pontos = (users[userIndex].pontos || 0) + 100;
     users[userIndex].dinheiro = (users[userIndex].dinheiro || 0) + 50;
 
@@ -76,7 +70,6 @@ app.post('/login', (req, res) => {
   }
 });
 
-// Rota para atualizar informações de um usuário usando PUT
 app.put('/users/:name', (req, res) => {
   const userName = req.params.name;
   const userIndex = users.findIndex((u) => u.nome === userName);
@@ -85,11 +78,11 @@ app.put('/users/:name', (req, res) => {
     const { pontos, dinheiro } = req.body;
 
     if (pontos !== undefined) {
-      users[userIndex].pontos = pontos;
+      users[userIndex].pontos = Math.max(pontos, 0);
     }
 
     if (dinheiro !== undefined) {
-      users[userIndex].dinheiro = dinheiro;
+      users[userIndex].dinheiro = Math.max(dinheiro, 0);
     }
 
     res.json(users[userIndex]);
